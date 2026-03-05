@@ -1,4 +1,5 @@
 // scripts.js — النسخة النهائية المحسّنة
+// البيانات تُحمَّل من data.js فورياً — API للإرسال فقط
 
 var APP = {
   step:1, nationalId:'', name:'', phone:'',
@@ -21,11 +22,17 @@ var STEP_LABEL = {
   '4c':'الخطوة 4 من 4', 'ok':'✅ اكتمل'
 };
 
+// ══════════════════════════════════════════════════════════════
+// تهيئة — فوري من data.js
+// ══════════════════════════════════════════════════════════════
 window.addEventListener('load', function() {
   document.getElementById('branchName').textContent = BRANCH_NAME;
   renderCategories(STATIC_DATA.categories);
 });
 
+// ══════════════════════════════════════════════════════════════
+// التنقل بين الخطوات
+// ══════════════════════════════════════════════════════════════
 function goStep(n) {
   document.querySelectorAll('.step').forEach(function(s){
     s.classList.remove('active');
@@ -37,11 +44,16 @@ function goStep(n) {
   var el = document.getElementById(idMap[String(n)]);
   if(el) el.classList.add('active');
   APP.step = n;
-  document.getElementById('progressBar').style.width = (STEP_PCT[String(n)] || 25) + '%';
-  document.getElementById('stepLabel').textContent = STEP_LABEL[String(n)] || '';
+  document.getElementById('progressBar').style.width =
+    (STEP_PCT[String(n)] || 25) + '%';
+  document.getElementById('stepLabel').textContent =
+    STEP_LABEL[String(n)] || '';
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
+// ══════════════════════════════════════════════════════════════
+// الخطوة 1 — التحقق من البيانات
+// ══════════════════════════════════════════════════════════════
 function goStep2() {
   var ni = document.getElementById('nationalId').value.trim();
   var nm = document.getElementById('name').value.trim();
@@ -51,7 +63,9 @@ function goStep2() {
   ok = _v('name',       nm.length >= 4,       'الاسم قصير — 4 أحرف على الأقل') && ok;
   ok = _v('phone',      /^01[0-9]{9}$/.test(ph), 'رقم الهاتف غير صحيح') && ok;
   if(!ok) return;
-  APP.nationalId = ni; APP.name = nm; APP.phone = ph;
+  APP.nationalId = ni;
+  APP.name       = nm;
+  APP.phone      = ph;
   goStep(2);
 }
 
@@ -63,13 +77,16 @@ function _v(id, ok, msg) {
   return ok;
 }
 
+// ══════════════════════════════════════════════════════════════
+// الخطوة 2 — الفئات (من data.js فوراً)
+// ══════════════════════════════════════════════════════════════
 function renderCategories(cats) {
   var grid = document.getElementById('categoryGrid');
   if(!grid) return;
   grid.innerHTML = '';
   cats.forEach(function(cat) {
     var meta = CAT_META[cat] || {icon:'🏥'};
-    var d = document.createElement('div');
+    var d    = document.createElement('div');
     d.className = 'cat-card';
     d.innerHTML = '<div class="cat-icon">' + meta.icon + '</div>'
                 + '<div class="cat-name">' + cat + '</div>';
@@ -85,18 +102,23 @@ function selectCat(cat, el) {
   el.classList.add('selected');
   APP.category = cat;
   document.getElementById('actionBtns').style.display = 'none';
+
+  // من data.js فوراً — بدون API
   renderProviders(STATIC_DATA.providers[cat] || []);
   goStep(3);
 }
 
+// ══════════════════════════════════════════════════════════════
+// الخطوة 3 — المنافذ (من data.js فوراً)
+// ══════════════════════════════════════════════════════════════
 function renderProviders(list) {
   var sel = document.getElementById('providerSelect');
   sel.innerHTML = '<option value="">-- اختر المنفذ --</option>';
   list.forEach(function(p) {
-    var o = document.createElement('option');
-    o.value = p.code;
+    var o          = document.createElement('option');
+    o.value        = p.code;
     o.dataset.name = p.name;
-    o.textContent = p.name + (p.location ? ' — ' + p.location : '');
+    o.textContent  = p.name + (p.location ? ' — ' + p.location : '');
     sel.appendChild(o);
   });
 }
@@ -113,10 +135,16 @@ function providerChanged() {
   document.getElementById('actionBtns').style.display = 'grid';
 }
 
+// ══════════════════════════════════════════════════════════════
+// الخطوة 4A — الاستبيان (أسئلة من data.js فوراً)
+// ══════════════════════════════════════════════════════════════
 function goSurvey() {
   goStep('4s');
+
+  // دمج الأسئلة المشتركة + أسئلة الفئة المختارة
   var questions = (STATIC_DATA.questions['shared'] || [])
-    .concat(STATIC_DATA.questions[APP.category] || []);
+    .concat(STATIC_DATA.questions[APP.category]   || []);
+
   renderSurvey(questions);
 }
 
@@ -129,31 +157,35 @@ function renderSurvey(questions) {
     var b = document.createElement('div');
     b.className = 'q-block';
     b.id = 'qb_' + q.code;
-
     var inp = '';
-    var code = q.code;
 
     if(q.type === 'rating') {
-      var btns = q.options.map(function(op) {
-        return '<button class="rating-btn" data-code="' + code + '" data-val="' + op + '" onclick="selR(this,' + JSON.stringify(code) + ')">' + op + '</button>';
-      }).join('');
-      inp = '<div class="rating-wrap">' + btns + '</div>';
+      inp = '<div class="rating-wrap">' +
+        q.options.map(function(op) {
+          return '<button class="rating-btn" data-code="' + q.code + '"'
+               + ' data-val="' + op + '"'
+               + ' onclick="selR(this,\'' + q.code + '\')">' + op + '</button>';
+        }).join('') + '</div>';
 
     } else if(q.type === 'yesno') {
       inp = '<div class="yesno-wrap">'
-          + '<button class="yesno-btn yes" data-code="' + code + '" onclick="selY(this,' + JSON.stringify(code) + ',' + JSON.stringify('نعم') + ')">✅ نعم</button>'
-          + '<button class="yesno-btn no"  data-code="' + code + '" onclick="selY(this,' + JSON.stringify(code) + ',' + JSON.stringify('لا')  + ')">❌ لا</button>'
+          + '<button class="yesno-btn yes" data-code="' + q.code + '"'
+          + ' onclick="selY(this,\'' + q.code + '\',\'نعم\')">✅ نعم</button>'
+          + '<button class="yesno-btn no" data-code="' + q.code + '"'
+          + ' onclick="selY(this,\'' + q.code + '\',\'لا\')">❌ لا</button>'
           + '</div>';
 
     } else if(q.type === 'multiple') {
-      var opts = q.options.map(function(op){
-        return '<option>' + op + '</option>';
-      }).join('');
-      inp = '<select onchange="APP.surveyAnswers[' + JSON.stringify(code) + ']=this.value">'
-          + '<option value="">-- اختر --</option>' + opts + '</select>';
+      inp = '<select onchange="APP.surveyAnswers[\'' + q.code + '\']=this.value">'
+          + '<option value="">-- اختر --</option>'
+          + q.options.map(function(op){
+              return '<option>' + op + '</option>';
+            }).join('')
+          + '</select>';
 
     } else {
-      inp = '<textarea rows="3" placeholder="اكتب هنا..." onchange="APP.surveyAnswers[' + JSON.stringify(code) + ']=this.value"></textarea>';
+      inp = '<textarea rows="3" placeholder="اكتب هنا..."'
+          + ' onchange="APP.surveyAnswers[\'' + q.code + '\']=this.value"></textarea>';
     }
 
     var rl = q.required ? '<span class="q-req"> *</span>' : '';
@@ -162,6 +194,7 @@ function renderSurvey(questions) {
     c.appendChild(b);
   });
 
+  // منطق الأسئلة المشروطة
   document.querySelectorAll('[data-code]').forEach(function(el) {
     el.addEventListener('click', function() {
       questions.filter(function(q){ return q.dependOn; }).forEach(function(q) {
@@ -187,6 +220,9 @@ function selY(btn, code, val) {
   APP.surveyAnswers[code] = val;
 }
 
+// ══════════════════════════════════════════════════════════════
+// إرسال الاستبيان — API فقط عند الإرسال
+// ══════════════════════════════════════════════════════════════
 function submitSurvey() {
   var btn = document.getElementById('surveyBtn');
   btn.disabled = true;
@@ -212,6 +248,9 @@ function submitSurvey() {
   });
 }
 
+// ══════════════════════════════════════════════════════════════
+// الخطوة 4B — الشكوى
+// ══════════════════════════════════════════════════════════════
 function goComplaint() { goStep('4c'); }
 
 function toggleRecord() {
@@ -245,8 +284,8 @@ function startRecording() {
     btn.classList.add('recording');
     APP.recInterval = setInterval(function() {
       APP.recSeconds++;
-      var m = String(Math.floor(APP.recSeconds / 60)).padStart(2,'0');
-      var s = String(APP.recSeconds % 60).padStart(2,'0');
+      var m = String(Math.floor(APP.recSeconds / 60)).padStart(2, '0');
+      var s = String(APP.recSeconds % 60).padStart(2, '0');
       document.getElementById('recTimer').textContent = m + ':' + s;
       if(APP.recSeconds >= APP.MAX_REC) stopRecording();
     }, 1000);
@@ -269,7 +308,10 @@ function stopRecording() {
 function handleAudioFile(input) {
   if(!input.files || !input.files[0]) return;
   var file = input.files[0];
-  if(file.size > 10 * 1024 * 1024) { alert('الملف أكبر من 10MB'); return; }
+  if(file.size > 10 * 1024 * 1024) {
+    alert('الملف أكبر من 10MB');
+    return;
+  }
   var fr = new FileReader();
   fr.onloadend = function() {
     APP.audioBase64 = fr.result.split(',')[1];
@@ -289,12 +331,16 @@ function previewImages() {
     img.src = URL.createObjectURL(f);
     c.appendChild(img);
   });
-  document.getElementById('uploadLabel').textContent = APP.imageFiles.length + ' صورة مختارة';
+  document.getElementById('uploadLabel').textContent =
+    APP.imageFiles.length + ' صورة مختارة';
 }
 
-async function submitComplaint() {
+// ══════════════════════════════════════════════════════════════
+// إرسال الشكوى — API فقط عند الإرسال
+// ══════════════════════════════════════════════════════════════
+function submitComplaint() {
   var text = document.getElementById('complaintText').value.trim();
-  if (!text && !APP.audioBase64) {
+  if(!text && !APP.audioBase64) {
     alert('الرجاء كتابة الشكوى أو تسجيلها صوتياً');
     return;
   }
@@ -302,39 +348,40 @@ async function submitComplaint() {
   btn.disabled = true;
   showLoading(true);
 
-  var imgs = [];
-  if (APP.imageFiles.length > 0) {
-    document.querySelector('#loadingOverlay p').textContent = 'جارٍ ضغط الصور...';
-    for (var i = 0; i < APP.imageFiles.length; i++) {
-      var compressed = await compressImage(APP.imageFiles[i]);
-      imgs.push(compressed.split(',')[1]);
-    }
-    document.querySelector('#loadingOverlay p').textContent = 'جارٍ الإرسال...';
-  }
-
-  callAPI('saveComplaint', {
-    payload: {
-      nationalId:   APP.nationalId,
-      name:         APP.name,
-      phone:        APP.phone,
-      category:     APP.category,
-      providerCode: APP.providerCode,
-      providerName: APP.providerName,
-      text:         text,
-      audioBase64:  APP.audioBase64 || null,
-      images:       imgs
-    }
-  }, function(err, res) {
-    showLoading(false);
-    if (err || !res || !res.success) {
-      alert('خطأ في الإرسال — حاول مرة أخرى');
-      btn.disabled = false;
-      return;
-    }
-    showSuccess(res.id, 'complaint');
+  Promise.all(APP.imageFiles.map(function(f) {
+    return new Promise(function(res) {
+      var r = new FileReader();
+      r.onloadend = function() { res(r.result.split(',')[1]); };
+      r.readAsDataURL(f);
+    });
+  })).then(function(imgs) {
+    callAPI('saveComplaint', {
+      payload: {
+        nationalId:   APP.nationalId,
+        name:         APP.name,
+        phone:        APP.phone,
+        category:     APP.category,
+        providerCode: APP.providerCode,
+        providerName: APP.providerName,
+        text:         text,
+        audioBase64:  APP.audioBase64 || null,
+        images:       imgs
+      }
+    }, function(err, res) {
+      showLoading(false);
+      if(err || !res || !res.success) {
+        alert('خطأ في الإرسال — حاول مرة أخرى');
+        btn.disabled = false;
+        return;
+      }
+      showSuccess(res.id, 'complaint');
+    });
   });
 }
 
+// ══════════════════════════════════════════════════════════════
+// callAPI — للإرسال فقط
+// ══════════════════════════════════════════════════════════════
 function callAPI(action, params, cb) {
   var body = JSON.stringify(Object.assign({action: action}, params || {}));
   fetch(SCRIPT_URL, {
@@ -347,6 +394,9 @@ function callAPI(action, params, cb) {
   .catch(function(err){ cb(err, null); });
 }
 
+// ══════════════════════════════════════════════════════════════
+// شاشة النجاح
+// ══════════════════════════════════════════════════════════════
 function showSuccess(id, type) {
   document.getElementById('ticketId').textContent = id;
   if(type === 'complaint') {
@@ -355,11 +405,15 @@ function showSuccess(id, type) {
       'سنتواصل معك خلال <strong>48 ساعة</strong> على <strong>' + APP.phone + '</strong>';
   } else {
     document.getElementById('successTitle').textContent = '✅ شكراً على تقييمك!';
-    document.getElementById('successMsg').textContent = 'رأيك يساعدنا على تحسين الخدمة 🌟';
+    document.getElementById('successMsg').textContent =
+      'رأيك يساعدنا على تحسين الخدمة 🌟';
   }
   goStep('ok');
 }
 
+// ══════════════════════════════════════════════════════════════
+// إعادة التشغيل
+// ══════════════════════════════════════════════════════════════
 function resetApp() {
   Object.assign(APP, {
     step:1, nationalId:'', name:'', phone:'',
@@ -373,8 +427,8 @@ function resetApp() {
   document.getElementById('audioPlayer').style.display  = 'none';
   document.getElementById('previewContainer').innerHTML = '';
   document.getElementById('uploadLabel').textContent    = 'اضغط لاختيار صور';
-  var afl = document.getElementById('audioFileLabel');
-  if(afl) afl.textContent = 'اضغط لاختيار ملف صوتي';
+  document.getElementById('audioFileLabel') &&
+    (document.getElementById('audioFileLabel').textContent = 'اضغط لاختيار ملف صوتي');
   document.getElementById('recTimer').textContent = '00:00';
   var mic = document.getElementById('micBtn');
   mic.textContent      = '🎙️ ابدأ التسجيل';
@@ -385,36 +439,4 @@ function resetApp() {
 
 function showLoading(show) {
   document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
-}
-
-async function compressImage(file) {
-  return new Promise(function(resolve) {
-    if (!file.type.startsWith('image/')) {
-      var reader = new FileReader();
-      reader.onload = function(e) { resolve(e.target.result); };
-      reader.readAsDataURL(file);
-      return;
-    }
-    var img = new Image();
-    var url = URL.createObjectURL(file);
-    img.onload = function() {
-      var MAX = 900;
-      var w = img.width, h = img.height;
-      if (w > MAX || h > MAX) {
-        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
-        else       { w = Math.round(w * MAX / h); h = MAX; }
-      }
-      var canvas = document.createElement('canvas');
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      URL.revokeObjectURL(url);
-      resolve(canvas.toDataURL('image/jpeg', 0.7));
-    };
-    img.onerror = function() {
-      var reader = new FileReader();
-      reader.onload = function(e) { resolve(e.target.result); };
-      reader.readAsDataURL(file);
-    };
-    img.src = url;
-  });
 }
