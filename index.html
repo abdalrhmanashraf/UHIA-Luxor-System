@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#0056B3">
+<title>التأمين الصحي الشامل — فرع الأقصر</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-inner">
+    <img id="headerLogo" src="https://upload.wikimedia.org/wikipedia/ar/a/ab/%D8%A7%D9%84%D9%87%D9%8A%D8%A6%D8%A9_%D8%A7%D9%84%D8%B9%D8%A7%D9%85%D8%A9_%D9%84%D9%84%D8%AA%D8%A3%D9%85%D9%8A%D9%86_%D8%A7%D9%84%D8%B5%D8%AD%D9%8A_%D8%A7%D9%84%D8%B4%D8%A7%D9%85%D9%84_%28%D9%85%D8%B5%D8%B1%29.png"
+         alt="شعار الهيئة" class="logo-img" onerror="this.style.display='none'">
+    <div>
+      <h1>الهيئة العامة للتأمين الصحي الشامل</h1>
+      <p id="branchName">فرع الأقصر</p>
+    </div>
+  </div>
+  <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+  <div class="steps-label"><span id="stepLabel">الخطوة 1 من 4</span></div>
+</header>
+
+<div class="container">
+
+  <!-- STEP 1 -->
+  <div class="card step active" id="step1">
+    <h2>📋 بياناتك الشخصية</h2>
+    <div class="form-group">
+      <label>الرقم القومي <span class="req">*</span></label>
+      <input type="tel" id="nationalId" maxlength="14" placeholder="14 رقم" inputmode="numeric">
+      <span class="field-err" id="err-nationalId"></span>
+    </div>
+    <div class="form-group">
+      <label>الاسم الكامل <span class="req">*</span></label>
+      <input type="text" id="name" placeholder="الاسم رباعي">
+      <span class="field-err" id="err-name"></span>
+    </div>
+    <div class="form-group">
+      <label>رقم الهاتف <span class="req">*</span></label>
+      <input type="tel" id="phone" maxlength="11" placeholder="01XXXXXXXXX" inputmode="numeric">
+      <span class="field-err" id="err-phone"></span>
+    </div>
+    <button class="btn-primary" onclick="goStep2()">التالي ←</button>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="card step" id="step2">
+    <h2>🏥 أين تلقيت الخدمة؟</h2>
+    <div class="category-grid" id="categoryGrid">
+      <div class="loading-inline"><div class="spinner sm"></div></div>
+    </div>
+    <button class="btn-ghost" onclick="goStep(1)">← رجوع</button>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="card step" id="step3">
+    <h2>📍 اختر المنفذ</h2>
+    <div class="form-group">
+      <label>اسم المنفذ <span class="req">*</span></label>
+      <select id="providerSelect" onchange="providerChanged()">
+        <option value="">-- اختر المنفذ --</option>
+      </select>
+    </div>
+    <div class="action-btns" id="actionBtns" style="display:none">
+      <button class="btn-survey" onclick="goSurvey()">
+        <span class="ab-icon">📊</span>
+        <span class="ab-title">استبيان الخدمة</span>
+        <span class="ab-sub">دقيقتان فقط</span>
+      </button>
+      <button class="btn-complaint" onclick="goComplaint()">
+        <span class="ab-icon">⚠️</span>
+        <span class="ab-title">تقديم شكوى</span>
+        <span class="ab-sub">نتابع خلال 48 ساعة</span>
+      </button>
+    </div>
+    <button class="btn-ghost" onclick="goStep(2)">← رجوع</button>
+  </div>
+
+  <!-- STEP 4A: استبيان -->
+  <div class="card step" id="step4survey">
+    <h2>📊 استبيان الخدمة</h2>
+    <div id="surveyQuestions"><div class="loading-inline"><div class="spinner sm"></div></div></div>
+    <button class="btn-primary" id="surveyBtn" onclick="submitSurvey()">إرسال الاستبيان ✓</button>
+    <button class="btn-ghost" onclick="goStep(3)">← رجوع</button>
+  </div>
+
+  <!-- STEP 4B: شكوى -->
+  <div class="card step" id="step4complaint">
+    <h2>⚠️ تقديم شكوى</h2>
+    <div class="form-group">
+      <label>وصف الشكوى <span class="req">*</span></label>
+      <textarea id="complaintText" rows="4" placeholder="اكتب تفاصيل شكواك هنا..."></textarea>
+    </div>
+
+    <!-- تسجيل صوتي مباشر (يعمل خارج Apps Script) -->
+    <div class="audio-section">
+      <label>🎙️ تسجيل صوتي (اختياري)</label>
+      <div class="audio-controls">
+        <button class="btn-mic" id="micBtn" onclick="toggleRecord()">🎙️ ابدأ التسجيل</button>
+        <span class="rec-timer" id="recTimer">00:00</span>
+      </div>
+      <audio id="audioPlayer" controls style="display:none;width:100%;margin-top:8px"></audio>
+      <p class="hint">أو ارفع ملف صوتي جاهز:</p>
+      <label class="upload-area" for="audioFileInput">
+        <span id="audioFileLabel">اضغط لاختيار ملف صوتي</span>
+        <input type="file" id="audioFileInput" accept="audio/*" capture="user"
+               style="display:none" onchange="handleAudioFile(this)">
+      </label>
+      <p class="hint">الحد الأقصى: 90 ثانية / 10MB</p>
+    </div>
+
+    <!-- صور -->
+    <div class="form-group">
+      <label>📎 إرفاق صور (اختياري)</label>
+      <label class="upload-area" for="imgInput">
+        <span id="uploadLabel">اضغط لاختيار صور</span>
+        <input type="file" id="imgInput" accept="image/*" multiple
+               style="display:none" onchange="previewImages()">
+      </label>
+      <div id="previewContainer" class="preview-grid"></div>
+    </div>
+
+    <button class="btn-primary" id="complaintBtn" onclick="submitComplaint()">إرسال الشكوى ✓</button>
+    <button class="btn-ghost" onclick="goStep(3)">← رجوع</button>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="card step" id="stepSuccess">
+    <div class="success-screen">
+      <div class="success-icon">✅</div>
+      <h2 id="successTitle">تم الإرسال بنجاح!</h2>
+      <div class="ticket-box">
+        <p>رقم المتابعة</p>
+        <div id="ticketId" class="ticket-num">---</div>
+      </div>
+      <p id="successMsg" class="success-msg"></p>
+      <button class="btn-primary" onclick="resetApp()">🔄 طلب جديد</button>
+    </div>
+  </div>
+
+</div>
+
+<div id="loadingOverlay" class="loading-overlay" style="display:none">
+  <div class="loading-box"><div class="spinner"></div><p>جارٍ الإرسال...</p></div>
+</div>
+
+<script src="config.js"></script>
+<script src="scripts.js"></script>
+</body>
+</html>
