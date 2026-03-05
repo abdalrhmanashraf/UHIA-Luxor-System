@@ -1,5 +1,11 @@
 // ── جلب البيانات محلياً بدون طلب API ─────────────────────
-
+var STATIC_DATA = {
+  categories: [
+    'وحدة صحية',
+    'مستشفى رعاية',
+    'مستشفى متعاقد',
+    'معمل متعاقد'
+  ],
 window.addEventListener('load', function() {
   document.getElementById('branchName').textContent = BRANCH_NAME;
   // فوري — بدون انتظار
