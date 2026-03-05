@@ -1,5 +1,4 @@
 // scripts.js — النسخة النهائية المحسّنة
-// البيانات تُحمَّل من data.js فورياً — API للإرسال فقط
 
 var APP = {
   step:1, nationalId:'', name:'', phone:'',
@@ -38,10 +37,8 @@ function goStep(n) {
   var el = document.getElementById(idMap[String(n)]);
   if(el) el.classList.add('active');
   APP.step = n;
-  document.getElementById('progressBar').style.width =
-    (STEP_PCT[String(n)] || 25) + '%';
-  document.getElementById('stepLabel').textContent =
-    STEP_LABEL[String(n)] || '';
+  document.getElementById('progressBar').style.width = (STEP_PCT[String(n)] || 25) + '%';
+  document.getElementById('stepLabel').textContent = STEP_LABEL[String(n)] || '';
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
@@ -54,9 +51,7 @@ function goStep2() {
   ok = _v('name',       nm.length >= 4,       'الاسم قصير — 4 أحرف على الأقل') && ok;
   ok = _v('phone',      /^01[0-9]{9}$/.test(ph), 'رقم الهاتف غير صحيح') && ok;
   if(!ok) return;
-  APP.nationalId = ni;
-  APP.name       = nm;
-  APP.phone      = ph;
+  APP.nationalId = ni; APP.name = nm; APP.phone = ph;
   goStep(2);
 }
 
@@ -74,7 +69,7 @@ function renderCategories(cats) {
   grid.innerHTML = '';
   cats.forEach(function(cat) {
     var meta = CAT_META[cat] || {icon:'🏥'};
-    var d    = document.createElement('div');
+    var d = document.createElement('div');
     d.className = 'cat-card';
     d.innerHTML = '<div class="cat-icon">' + meta.icon + '</div>'
                 + '<div class="cat-name">' + cat + '</div>';
@@ -98,10 +93,10 @@ function renderProviders(list) {
   var sel = document.getElementById('providerSelect');
   sel.innerHTML = '<option value="">-- اختر المنفذ --</option>';
   list.forEach(function(p) {
-    var o          = document.createElement('option');
-    o.value        = p.code;
+    var o = document.createElement('option');
+    o.value = p.code;
     o.dataset.name = p.name;
-    o.textContent  = p.name + (p.location ? ' — ' + p.location : '');
+    o.textContent = p.name + (p.location ? ' — ' + p.location : '');
     sel.appendChild(o);
   });
 }
@@ -121,7 +116,7 @@ function providerChanged() {
 function goSurvey() {
   goStep('4s');
   var questions = (STATIC_DATA.questions['shared'] || [])
-    .concat(STATIC_DATA.questions[APP.category]   || []);
+    .concat(STATIC_DATA.questions[APP.category] || []);
   renderSurvey(questions);
 }
 
@@ -134,35 +129,31 @@ function renderSurvey(questions) {
     var b = document.createElement('div');
     b.className = 'q-block';
     b.id = 'qb_' + q.code;
+
     var inp = '';
+    var code = q.code;
 
     if(q.type === 'rating') {
-      inp = '<div class="rating-wrap">' +
-        q.options.map(function(op) {
-          return '<button class="rating-btn" data-code="' + q.code + '"'
-               + ' data-val="' + op + '"'
-               + ' onclick="selR(this,\'' + q.code + '\')">' + op + '</button>';
-        }).join('') + '</div>';
+      var btns = q.options.map(function(op) {
+        return '<button class="rating-btn" data-code="' + code + '" data-val="' + op + '" onclick="selR(this,' + JSON.stringify(code) + ')">' + op + '</button>';
+      }).join('');
+      inp = '<div class="rating-wrap">' + btns + '</div>';
 
     } else if(q.type === 'yesno') {
       inp = '<div class="yesno-wrap">'
-          + '<button class="yesno-btn yes" data-code="' + q.code + '"'
-          + ' onclick="selY(this,\'' + q.code + '\',\'نعم\')">✅ نعم</button>'
-          + '<button class="yesno-btn no" data-code="' + q.code + '"'
-          + ' onclick="selY(this,\'' + q.code + '\',\'لا\')">❌ لا</button>'
+          + '<button class="yesno-btn yes" data-code="' + code + '" onclick="selY(this,' + JSON.stringify(code) + ',' + JSON.stringify('نعم') + ')">✅ نعم</button>'
+          + '<button class="yesno-btn no"  data-code="' + code + '" onclick="selY(this,' + JSON.stringify(code) + ',' + JSON.stringify('لا')  + ')">❌ لا</button>'
           + '</div>';
 
     } else if(q.type === 'multiple') {
-      inp = '<select onchange="APP.surveyAnswers[\'' + q.code + '\']=this.value">'
-          + '<option value="">-- اختر --</option>'
-          + q.options.map(function(op){
-              return '<option>' + op + '</option>';
-            }).join('')
-          + '</select>';
+      var opts = q.options.map(function(op){
+        return '<option>' + op + '</option>';
+      }).join('');
+      inp = '<select onchange="APP.surveyAnswers[' + JSON.stringify(code) + ']=this.value">'
+          + '<option value="">-- اختر --</option>' + opts + '</select>';
 
     } else {
-      inp = '<textarea rows="3" placeholder="اكتب هنا..."'
-          + ' onchange="APP.surveyAnswers[\'' + q.code + '\']=this.value"></textarea>';
+      inp = '<textarea rows="3" placeholder="اكتب هنا..." onchange="APP.surveyAnswers[' + JSON.stringify(code) + ']=this.value"></textarea>';
     }
 
     var rl = q.required ? '<span class="q-req"> *</span>' : '';
@@ -254,8 +245,8 @@ function startRecording() {
     btn.classList.add('recording');
     APP.recInterval = setInterval(function() {
       APP.recSeconds++;
-      var m = String(Math.floor(APP.recSeconds / 60)).padStart(2, '0');
-      var s = String(APP.recSeconds % 60).padStart(2, '0');
+      var m = String(Math.floor(APP.recSeconds / 60)).padStart(2,'0');
+      var s = String(APP.recSeconds % 60).padStart(2,'0');
       document.getElementById('recTimer').textContent = m + ':' + s;
       if(APP.recSeconds >= APP.MAX_REC) stopRecording();
     }, 1000);
@@ -278,10 +269,7 @@ function stopRecording() {
 function handleAudioFile(input) {
   if(!input.files || !input.files[0]) return;
   var file = input.files[0];
-  if(file.size > 10 * 1024 * 1024) {
-    alert('الملف أكبر من 10MB');
-    return;
-  }
+  if(file.size > 10 * 1024 * 1024) { alert('الملف أكبر من 10MB'); return; }
   var fr = new FileReader();
   fr.onloadend = function() {
     APP.audioBase64 = fr.result.split(',')[1];
@@ -301,13 +289,9 @@ function previewImages() {
     img.src = URL.createObjectURL(f);
     c.appendChild(img);
   });
-  document.getElementById('uploadLabel').textContent =
-    APP.imageFiles.length + ' صورة مختارة';
+  document.getElementById('uploadLabel').textContent = APP.imageFiles.length + ' صورة مختارة';
 }
 
-// ══════════════════════════════════════════════════════════════
-// إرسال الشكوى — مع ضغط الصور ✅
-// ══════════════════════════════════════════════════════════════
 async function submitComplaint() {
   var text = document.getElementById('complaintText').value.trim();
   if (!text && !APP.audioBase64) {
@@ -321,8 +305,8 @@ async function submitComplaint() {
   var imgs = [];
   if (APP.imageFiles.length > 0) {
     document.querySelector('#loadingOverlay p').textContent = 'جارٍ ضغط الصور...';
-    for (var f of APP.imageFiles) {
-      var compressed = await compressImage(f);
+    for (var i = 0; i < APP.imageFiles.length; i++) {
+      var compressed = await compressImage(APP.imageFiles[i]);
       imgs.push(compressed.split(',')[1]);
     }
     document.querySelector('#loadingOverlay p').textContent = 'جارٍ الإرسال...';
@@ -371,8 +355,7 @@ function showSuccess(id, type) {
       'سنتواصل معك خلال <strong>48 ساعة</strong> على <strong>' + APP.phone + '</strong>';
   } else {
     document.getElementById('successTitle').textContent = '✅ شكراً على تقييمك!';
-    document.getElementById('successMsg').textContent =
-      'رأيك يساعدنا على تحسين الخدمة 🌟';
+    document.getElementById('successMsg').textContent = 'رأيك يساعدنا على تحسين الخدمة 🌟';
   }
   goStep('ok');
 }
@@ -390,8 +373,8 @@ function resetApp() {
   document.getElementById('audioPlayer').style.display  = 'none';
   document.getElementById('previewContainer').innerHTML = '';
   document.getElementById('uploadLabel').textContent    = 'اضغط لاختيار صور';
-  document.getElementById('audioFileLabel') &&
-    (document.getElementById('audioFileLabel').textContent = 'اضغط لاختيار ملف صوتي');
+  var afl = document.getElementById('audioFileLabel');
+  if(afl) afl.textContent = 'اضغط لاختيار ملف صوتي';
   document.getElementById('recTimer').textContent = '00:00';
   var mic = document.getElementById('micBtn');
   mic.textContent      = '🎙️ ابدأ التسجيل';
@@ -404,38 +387,32 @@ function showLoading(show) {
   document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
 }
 
-// ══════════════════════════════════════════════════════════════
-// ضغط الصور قبل الإرسال
-// ══════════════════════════════════════════════════════════════
 async function compressImage(file) {
-  return new Promise((resolve) => {
+  return new Promise(function(resolve) {
     if (!file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = e => resolve(e.target.result);
+      var reader = new FileReader();
+      reader.onload = function(e) { resolve(e.target.result); };
       reader.readAsDataURL(file);
       return;
     }
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      const MAX_WIDTH = 900;
-      const MAX_HEIGHT = 900;
-      let w = img.width;
-      let h = img.height;
-      if (w > MAX_WIDTH || h > MAX_HEIGHT) {
-        if (w > h) { h = Math.round(h * MAX_WIDTH / w); w = MAX_WIDTH; }
-        else       { w = Math.round(w * MAX_HEIGHT / h); h = MAX_HEIGHT; }
+    var img = new Image();
+    var url = URL.createObjectURL(file);
+    img.onload = function() {
+      var MAX = 900;
+      var w = img.width, h = img.height;
+      if (w > MAX || h > MAX) {
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+        else       { w = Math.round(w * MAX / h); h = MAX; }
       }
-      const canvas = document.createElement('canvas');
-      canvas.width = w;
-      canvas.height = h;
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
       URL.revokeObjectURL(url);
       resolve(canvas.toDataURL('image/jpeg', 0.7));
     };
-    img.onerror = () => {
-      const reader = new FileReader();
-      reader.onload = e => resolve(e.target.result);
+    img.onerror = function() {
+      var reader = new FileReader();
+      reader.onload = function(e) { resolve(e.target.result); };
       reader.readAsDataURL(file);
     };
     img.src = url;
