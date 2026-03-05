@@ -22,17 +22,11 @@ var STEP_LABEL = {
   '4c':'الخطوة 4 من 4', 'ok':'✅ اكتمل'
 };
 
-// ══════════════════════════════════════════════════════════════
-// تهيئة — فوري من data.js
-// ══════════════════════════════════════════════════════════════
 window.addEventListener('load', function() {
   document.getElementById('branchName').textContent = BRANCH_NAME;
   renderCategories(STATIC_DATA.categories);
 });
 
-// ══════════════════════════════════════════════════════════════
-// التنقل بين الخطوات
-// ══════════════════════════════════════════════════════════════
 function goStep(n) {
   document.querySelectorAll('.step').forEach(function(s){
     s.classList.remove('active');
@@ -51,9 +45,6 @@ function goStep(n) {
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
-// ══════════════════════════════════════════════════════════════
-// الخطوة 1 — التحقق من البيانات
-// ══════════════════════════════════════════════════════════════
 function goStep2() {
   var ni = document.getElementById('nationalId').value.trim();
   var nm = document.getElementById('name').value.trim();
@@ -77,9 +68,6 @@ function _v(id, ok, msg) {
   return ok;
 }
 
-// ══════════════════════════════════════════════════════════════
-// الخطوة 2 — الفئات (من data.js فوراً)
-// ══════════════════════════════════════════════════════════════
 function renderCategories(cats) {
   var grid = document.getElementById('categoryGrid');
   if(!grid) return;
@@ -102,15 +90,10 @@ function selectCat(cat, el) {
   el.classList.add('selected');
   APP.category = cat;
   document.getElementById('actionBtns').style.display = 'none';
-
-  // من data.js فوراً — بدون API
   renderProviders(STATIC_DATA.providers[cat] || []);
   goStep(3);
 }
 
-// ══════════════════════════════════════════════════════════════
-// الخطوة 3 — المنافذ (من data.js فوراً)
-// ══════════════════════════════════════════════════════════════
 function renderProviders(list) {
   var sel = document.getElementById('providerSelect');
   sel.innerHTML = '<option value="">-- اختر المنفذ --</option>';
@@ -135,16 +118,10 @@ function providerChanged() {
   document.getElementById('actionBtns').style.display = 'grid';
 }
 
-// ══════════════════════════════════════════════════════════════
-// الخطوة 4A — الاستبيان (أسئلة من data.js فوراً)
-// ══════════════════════════════════════════════════════════════
 function goSurvey() {
   goStep('4s');
-
-  // دمج الأسئلة المشتركة + أسئلة الفئة المختارة
   var questions = (STATIC_DATA.questions['shared'] || [])
     .concat(STATIC_DATA.questions[APP.category]   || []);
-
   renderSurvey(questions);
 }
 
@@ -194,7 +171,6 @@ function renderSurvey(questions) {
     c.appendChild(b);
   });
 
-  // منطق الأسئلة المشروطة
   document.querySelectorAll('[data-code]').forEach(function(el) {
     el.addEventListener('click', function() {
       questions.filter(function(q){ return q.dependOn; }).forEach(function(q) {
@@ -220,9 +196,6 @@ function selY(btn, code, val) {
   APP.surveyAnswers[code] = val;
 }
 
-// ══════════════════════════════════════════════════════════════
-// إرسال الاستبيان — API فقط عند الإرسال
-// ══════════════════════════════════════════════════════════════
 function submitSurvey() {
   var btn = document.getElementById('surveyBtn');
   btn.disabled = true;
@@ -248,9 +221,6 @@ function submitSurvey() {
   });
 }
 
-// ══════════════════════════════════════════════════════════════
-// الخطوة 4B — الشكوى
-// ══════════════════════════════════════════════════════════════
 function goComplaint() { goStep('4c'); }
 
 function toggleRecord() {
@@ -336,9 +306,6 @@ function previewImages() {
 }
 
 // ══════════════════════════════════════════════════════════════
-// إرسال الشكوى — API فقط عند الإرسال
-// ══════════════════════════════════════════════════════════════
-// ══════════════════════════════════════════════════════════════
 // إرسال الشكوى — مع ضغط الصور ✅
 // ══════════════════════════════════════════════════════════════
 async function submitComplaint() {
@@ -347,12 +314,10 @@ async function submitComplaint() {
     alert('الرجاء كتابة الشكوى أو تسجيلها صوتياً');
     return;
   }
-
   var btn = document.getElementById('complaintBtn');
   btn.disabled = true;
   showLoading(true);
 
-  // ضغط الصور قبل الإرسال
   var imgs = [];
   if (APP.imageFiles.length > 0) {
     document.querySelector('#loadingOverlay p').textContent = 'جارٍ ضغط الصور...';
@@ -386,34 +351,6 @@ async function submitComplaint() {
   });
 }
 
-  })).then(function(imgs) {
-    callAPI('saveComplaint', {
-      payload: {
-        nationalId:   APP.nationalId,
-        name:         APP.name,
-        phone:        APP.phone,
-        category:     APP.category,
-        providerCode: APP.providerCode,
-        providerName: APP.providerName,
-        text:         text,
-        audioBase64:  APP.audioBase64 || null,
-        images:       imgs
-      }
-    }, function(err, res) {
-      showLoading(false);
-      if(err || !res || !res.success) {
-        alert('خطأ في الإرسال — حاول مرة أخرى');
-        btn.disabled = false;
-        return;
-      }
-      showSuccess(res.id, 'complaint');
-    });
-  });
-}
-
-// ══════════════════════════════════════════════════════════════
-// callAPI — للإرسال فقط
-// ══════════════════════════════════════════════════════════════
 function callAPI(action, params, cb) {
   var body = JSON.stringify(Object.assign({action: action}, params || {}));
   fetch(SCRIPT_URL, {
@@ -426,9 +363,6 @@ function callAPI(action, params, cb) {
   .catch(function(err){ cb(err, null); });
 }
 
-// ══════════════════════════════════════════════════════════════
-// شاشة النجاح
-// ══════════════════════════════════════════════════════════════
 function showSuccess(id, type) {
   document.getElementById('ticketId').textContent = id;
   if(type === 'complaint') {
@@ -443,9 +377,6 @@ function showSuccess(id, type) {
   goStep('ok');
 }
 
-// ══════════════════════════════════════════════════════════════
-// إعادة التشغيل
-// ══════════════════════════════════════════════════════════════
 function resetApp() {
   Object.assign(APP, {
     step:1, nationalId:'', name:'', phone:'',
@@ -472,57 +403,41 @@ function resetApp() {
 function showLoading(show) {
   document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
 }
+
+// ══════════════════════════════════════════════════════════════
 // ضغط الصور قبل الإرسال
+// ══════════════════════════════════════════════════════════════
 async function compressImage(file) {
   return new Promise((resolve) => {
-    // لو مش صورة، ارجعها كما هي
     if (!file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = e => resolve(e.target.result);
       reader.readAsDataURL(file);
       return;
     }
-
     const img = new Image();
     const url = URL.createObjectURL(file);
-
     img.onload = () => {
       const MAX_WIDTH = 900;
       const MAX_HEIGHT = 900;
       let w = img.width;
       let h = img.height;
-
-      // تصغير الأبعاد لو كبيرة
       if (w > MAX_WIDTH || h > MAX_HEIGHT) {
-        if (w > h) {
-          h = Math.round(h * MAX_WIDTH / w);
-          w = MAX_WIDTH;
-        } else {
-          w = Math.round(w * MAX_HEIGHT / h);
-          h = MAX_HEIGHT;
-        }
+        if (w > h) { h = Math.round(h * MAX_WIDTH / w); w = MAX_WIDTH; }
+        else       { w = Math.round(w * MAX_HEIGHT / h); h = MAX_HEIGHT; }
       }
-
       const canvas = document.createElement('canvas');
       canvas.width = w;
       canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, w, h);
-
-      URL.revokeObjectURL(url); // تحرير الذاكرة
-
-      // جودة 70% — توازن بين الحجم والوضوح
-      const compressed = canvas.toDataURL('image/jpeg', 0.7);
-      resolve(compressed);
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL('image/jpeg', 0.7));
     };
-
     img.onerror = () => {
       const reader = new FileReader();
       reader.onload = e => resolve(e.target.result);
       reader.readAsDataURL(file);
     };
-
     img.src = url;
   });
 }
-
