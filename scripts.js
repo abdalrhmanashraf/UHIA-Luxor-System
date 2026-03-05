@@ -223,20 +223,27 @@ function selY(btn, code, val) {
 // ══════════════════════════════════════════════════════════════
 // إرسال الاستبيان — API فقط عند الإرسال
 // ══════════════════════════════════════════════════════════════
-function submitSurvey() {
-  var btn = document.getElementById('surveyBtn');
-  btn.disabled = true;
-  showLoading(true);
-  callAPI('saveSurvey', {
-    payload: {
-      nationalId:   APP.nationalId,
-      name:         APP.name,
-      phone:        APP.phone,
-      category:     APP.category,
-      providerCode: APP.providerCode,
-      providerName: APP.providerName,
-      answers:      APP.surveyAnswers
-    }
+function collectSurveyAnswers() {
+  // كل الأسئلة الممكنة
+  var ALL_QUESTIONS = [
+    'Q_COM_01','Q_COM_02','Q_COM_03','Q_COM_03B',
+    'Q_COM_04','Q_COM_05','Q_COM_99',
+    'Q_UNIT_01','Q_UNIT_02','Q_UNIT_03','Q_UNIT_04',
+    'Q_CARE_01','Q_CARE_02','Q_CARE_03','Q_CARE_04','Q_CARE_05',
+    'Q_CONT_01','Q_CONT_02','Q_CONT_03','Q_CONT_04',
+    'Q_LAB_01','Q_LAB_02','Q_LAB_03','Q_LAB_04'
+  ];
+
+  var answers = {};
+
+  // ✅ كل الأسئلة تتبعت — الفاضية بـ null
+  ALL_QUESTIONS.forEach(function(qCode) {
+    answers[qCode] = APP.surveyAnswers[qCode] || null;
+  });
+
+  return answers;
+}
+
   }, function(err, res) {
     showLoading(false);
     if(err || !res || !res.success) {
