@@ -85,35 +85,35 @@ var STATIC_DATA = {
   questions: {
     shared: [
       {code:'Q_COM_01',type:'rating',text:'ما مدى رضاك العام عن الخدمة المقدمة؟',required:true,options:['ضعيف جداً','ضعيف','مقبول','جيد','جيد جداً']},
-      {code:'Q_COM_02',type:'yesno',text:"هل لديك معرفة بمبادرة 'من حقك أن تختار'؟",required:true,options:['نعم','لا']},
-      {code:'Q_COM_03',type:'yesno',text:'هل طُلب منك دفع مبلغ مالي؟',required:true,options:['نعم','لا']},
-      {code:'Q_COM_03B',type:'multiple',text:'إن كانت نعم — طبيعة المبلغ؟',required:false,options:['مساهمة مالية طبقاً للقانون','مقابل تقديم خدمة','بدون سبب واضح'],dependOn:'Q_COM_03',dependVal:'نعم'},
-      {code:'Q_COM_04',type:'rating',text:'كيف تقيّم معاملة الطاقم الطبي والإداري؟',required:true,options:['ضعيف جداً','ضعيف','مقبول','جيد','جيد جداً']},
-      {code:'Q_COM_05',type:'rating',text:'كيف تقيّم نظافة المكان؟',required:true,options:['ضعيف جداً','ضعيف','مقبول','جيد','جيد جداً']},
+      {code:'Q_COM_02',type:'yesno',text:'هل لديك معرفة بمبادرة من حقك أن تختار؟',required:true,options:['نعم','لا']},
+      {code:'Q_COM_03',type:'yesno',text:'هل طلب منك دفع مبلغ مالي؟',required:true,options:['نعم','لا']},
+      {code:'Q_COM_03B',type:'multiple',text:'إن كانت نعم - طبيعة المبلغ؟',required:false,options:['مساهمة مالية طبقاً للقانون','مقابل تقديم خدمة','بدون سبب واضح'],dependOn:'Q_COM_03',dependVal:'نعم'},
+      {code:'Q_COM_04',type:'rating',text:'كيف تقيم معاملة الطاقم الطبي والإداري؟',required:true,options:['ضعيف جداً','ضعيف','مقبول','جيد','جيد جداً']},
+      {code:'Q_COM_05',type:'rating',text:'كيف تقيم نظافة المكان؟',required:true,options:['ضعيف جداً','ضعيف','مقبول','جيد','جيد جداً']},
       {code:'Q_COM_99',type:'text',text:'ملاحظات أو اقتراحات إضافية',required:false,options:[]}
     ],
     'وحدة صحية': [
-      {code:'Q_UNIT_01',type:'rating',text:'كيف تقيّم سرعة الاستجابة وتقديم الخدمة؟',required:true,options:['ضعيف جداً','ضعيف','مقبول','جيد','جيد جداً']},
+      {code:'Q_UNIT_01',type:'rating',text:'كيف تقيم سرعة الاستجابة وتقديم الخدمة؟',required:true,options:['ضعيف جداً','ضعيف','مقبول','جيد','جيد جداً']},
       {code:'Q_UNIT_02',type:'yesno',text:'هل تم توجيهك بشكل صحيح عند الوصول للوحدة؟',required:true,options:['نعم','لا']},
-      {code:'Q_UNIT_03',type:'rating',text:'كيف تقيّم توافر الأدوية والتجهيزات؟',required:true,options:['ضعيف جداً','ضعيف','مقبول','جيد','جيد جداً']},
+      {code:'Q_UNIT_03',type:'rating',text:'كيف تقيم توافر الأدوية والتجهيزات؟',required:true,options:['ضعيف جداً','ضعيف','مقبول','جيد','جيد جداً']},
       {code:'Q_UNIT_04',type:'yesno',text:'هل تم إعلامك بحقوقك كمنتفع من التأمين الصحي الشامل؟',required:true,options:['نعم','لا']}
     ],
     'مستشفى رعاية': [
-      {code:'Q_CARE_01',type:'rating',text:'كيف تقيّم وقت الانتظار قبل تلقي الخدمة؟',required:true,options:['ضعيف جداً','ضعيف','مقبول','جيد','جيد جداً']},
-      {code:'Q_CARE_02',type:'rating',text:'كيف تقيّم جودة الرعاية الطبية المقدمة؟',required:true,options:['ضعيف جداً','ضعيف','مقبول','جيد','جيد جداً']},
+      {code:'Q_CARE_01',type:'rating',text:'كيف تقيم وقت الانتظار قبل تلقي الخدمة؟',required:true,options:['ضعيف جداً','ضعيف','مقبول','جيد','جيد جداً']},
+      {code:'Q_CARE_02',type:'rating',text:'كيف تقيم جودة الرعاية الطبية المقدمة؟',required:true,options:['ضعيف جداً','ضعيف','مقبول','جيد','جيد جداً']},
       {code:'Q_CARE_03',type:'yesno',text:'هل وجدت التخصص المطلوب متاحاً؟',required:true,options:['نعم','لا']},
-      {code:'Q_CARE_04',type:'rating',text:'كيف تقيّم توافر الأجهزة والتجهيزات الطبية؟',required:true,options:['ضعيف جداً','ضعيف','مقبول','جيد','جيد جداً']},
+      {code:'Q_CARE_04',type:'rating',text:'كيف تقيم توافر الأجهزة والتجهيزات الطبية؟',required:true,options:['ضعيف جداً','ضعيف','مقبول','جيد','جيد جداً']},
       {code:'Q_CARE_05',type:'yesno',text:'هل تم شرح خطة العلاج بوضوح؟',required:true,options:['نعم','لا']}
     ],
     'مستشفى متعاقد': [
-      {code:'Q_CONT_01',type:'rating',text:'كيف تقيّم سهولة الوصول والتسجيل في المستشفى؟',required:true,options:['ضعيف جداً','ضعيف','مقبول','جيد','جيد جداً']},
-      {code:'Q_CONT_02',type:'rating',text:'كيف تقيّم جودة الخدمة مقارنة بالمستشفيات الحكومية؟',required:true,options:['ضعيف جداً','ضعيف','مقبول','جيد','جيد جداً']},
+      {code:'Q_CONT_01',type:'rating',text:'كيف تقيم سهولة الوصول والتسجيل في المستشفى؟',required:true,options:['ضعيف جداً','ضعيف','مقبول','جيد','جيد جداً']},
+      {code:'Q_CONT_02',type:'rating',text:'كيف تقيم جودة الخدمة مقارنة بالمستشفيات الحكومية؟',required:true,options:['ضعيف جداً','ضعيف','مقبول','جيد','جيد جداً']},
       {code:'Q_CONT_03',type:'yesno',text:'هل تم قبولك بدون أي تعقيدات إضافية؟',required:true,options:['نعم','لا']},
       {code:'Q_CONT_04',type:'yesno',text:'هل أُعلمت بحقك في الاختيار بين المستشفيات؟',required:true,options:['نعم','لا']}
     ],
     'معمل متعاقد': [
-      {code:'Q_LAB_01',type:'rating',text:'كيف تقيّم سرعة إنجاز نتائج التحاليل؟',required:true,options:['ضعيف جداً','ضعيف','مقبول','جيد','جيد جداً']},
-      {code:'Q_LAB_02',type:'rating',text:'كيف تقيّم طريقة استلام النتائج؟',required:true,options:['ضعيف جداً','ضعيف','مقبول','جيد','جيد جداً']},
+      {code:'Q_LAB_01',type:'rating',text:'كيف تقيم سرعة إنجاز نتائج التحاليل؟',required:true,options:['ضعيف جداً','ضعيف','مقبول','جيد','جيد جداً']},
+      {code:'Q_LAB_02',type:'rating',text:'كيف تقيم طريقة استلام النتائج؟',required:true,options:['ضعيف جداً','ضعيف','مقبول','جيد','جيد جداً']},
       {code:'Q_LAB_03',type:'yesno',text:'هل كانت النتائج واضحة ومشروحة؟',required:true,options:['نعم','لا']},
       {code:'Q_LAB_04',type:'yesno',text:'هل تم التعامل معك باحترافية أثناء أخذ العينة؟',required:true,options:['نعم','لا']}
     ]
