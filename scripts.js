@@ -420,6 +420,13 @@ function resetApp() {
     category:'', providerCode:'', providerName:'',
     surveyAnswers:{}, audioBase64:null, imageFiles:[]
   });
+
+  // ✅ أضف هذين السطرين — إعادة تفعيل الأزرار
+  var sBtn = document.getElementById('surveyBtn');
+  var cBtn = document.getElementById('complaintBtn');
+  if(sBtn) sBtn.disabled = false;
+  if(cBtn) cBtn.disabled = false;
+
   ['nationalId','name','phone','complaintText'].forEach(function(id){
     var el = document.getElementById(id);
     if(el) el.value = '';
@@ -427,13 +434,23 @@ function resetApp() {
   document.getElementById('audioPlayer').style.display  = 'none';
   document.getElementById('previewContainer').innerHTML = '';
   document.getElementById('uploadLabel').textContent    = 'اضغط لاختيار صور';
-  document.getElementById('audioFileLabel') &&
-    (document.getElementById('audioFileLabel').textContent = 'اضغط لاختيار ملف صوتي');
+  var afl = document.getElementById('audioFileLabel');
+  if(afl) afl.textContent = 'اضغط لاختيار ملف صوتي';
   document.getElementById('recTimer').textContent = '00:00';
   var mic = document.getElementById('micBtn');
   mic.textContent      = '🎙️ ابدأ التسجيل';
   mic.style.background = '';
   mic.classList.remove('recording');
+
+  // ✅ إعادة تعيين select المنفذ وإخفاء الأزرار
+  var sel = document.getElementById('providerSelect');
+  if(sel) sel.innerHTML = '<option value="">-- اختر المنفذ --</option>';
+  document.getElementById('actionBtns').style.display = 'none';
+
+  // ✅ مسح إجابات الاستبيان من الشاشة
+  var sq = document.getElementById('surveyQuestions');
+  if(sq) sq.innerHTML = '';
+
   goStep(1);
 }
 
