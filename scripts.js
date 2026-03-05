@@ -1,5 +1,4 @@
 // scripts.js — النسخة النهائية المحسّنة
-// البيانات تُحمَّل من data.js فورياً — API للإرسال فقط
 
 var APP = {
   step:1, nationalId:'', name:'', phone:'',
@@ -22,17 +21,11 @@ var STEP_LABEL = {
   '4c':'الخطوة 4 من 4', 'ok':'✅ اكتمل'
 };
 
-// ══════════════════════════════════════════════════════════════
-// تهيئة — فوري من data.js
-// ══════════════════════════════════════════════════════════════
 window.addEventListener('load', function() {
   document.getElementById('branchName').textContent = BRANCH_NAME;
   renderCategories(STATIC_DATA.categories);
 });
 
-// ══════════════════════════════════════════════════════════════
-// التنقل بين الخطوات
-// ══════════════════════════════════════════════════════════════
 function goStep(n) {
   document.querySelectorAll('.step').forEach(function(s){
     s.classList.remove('active');
@@ -51,9 +44,6 @@ function goStep(n) {
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
-// ══════════════════════════════════════════════════════════════
-// الخطوة 1 — التحقق من البيانات
-// ══════════════════════════════════════════════════════════════
 function goStep2() {
   var ni = document.getElementById('nationalId').value.trim();
   var nm = document.getElementById('name').value.trim();
@@ -77,9 +67,6 @@ function _v(id, ok, msg) {
   return ok;
 }
 
-// ══════════════════════════════════════════════════════════════
-// الخطوة 2 — الفئات (من data.js فوراً)
-// ══════════════════════════════════════════════════════════════
 function renderCategories(cats) {
   var grid = document.getElementById('categoryGrid');
   if(!grid) return;
@@ -102,15 +89,10 @@ function selectCat(cat, el) {
   el.classList.add('selected');
   APP.category = cat;
   document.getElementById('actionBtns').style.display = 'none';
-
-  // من data.js فوراً — بدون API
   renderProviders(STATIC_DATA.providers[cat] || []);
   goStep(3);
 }
 
-// ══════════════════════════════════════════════════════════════
-// الخطوة 3 — المنافذ (من data.js فوراً)
-// ══════════════════════════════════════════════════════════════
 function renderProviders(list) {
   var sel = document.getElementById('providerSelect');
   sel.innerHTML = '<option value="">-- اختر المنفذ --</option>';
@@ -135,16 +117,10 @@ function providerChanged() {
   document.getElementById('actionBtns').style.display = 'grid';
 }
 
-// ══════════════════════════════════════════════════════════════
-// الخطوة 4A — الاستبيان (أسئلة من data.js فوراً)
-// ══════════════════════════════════════════════════════════════
 function goSurvey() {
   goStep('4s');
-
-  // دمج الأسئلة المشتركة + أسئلة الفئة المختارة
   var questions = (STATIC_DATA.questions['shared'] || [])
-    .concat(STATIC_DATA.questions[APP.category]   || []);
-
+    .concat(STATIC_DATA.questions[APP.category] || []);
   renderSurvey(questions);
 }
 
@@ -194,7 +170,6 @@ function renderSurvey(questions) {
     c.appendChild(b);
   });
 
-  // منطق الأسئلة المشروطة
   document.querySelectorAll('[data-code]').forEach(function(el) {
     el.addEventListener('click', function() {
       questions.filter(function(q){ return q.dependOn; }).forEach(function(q) {
@@ -220,12 +195,6 @@ function selY(btn, code, val) {
   APP.surveyAnswers[code] = val;
 }
 
-// ══════════════════════════════════════════════════════════════
-// إرسال الاستبيان — API فقط عند الإرسال
-// ══════════════════════════════════════════════════════════════
-// ══════════════════════════════════════
-// أضف دالة collectSurveyAnswers أولاً
-// ══════════════════════════════════════
 function collectSurveyAnswers() {
   var ALL_QUESTIONS = [
     'Q_COM_01','Q_COM_02','Q_COM_03','Q_COM_03B',
@@ -237,14 +206,13 @@ function collectSurveyAnswers() {
   ];
   var answers = {};
   ALL_QUESTIONS.forEach(function(qCode) {
-    answers[qCode] = APP.surveyAnswers[qCode] || null;
+    answers[qCode] = APP.surveyAnswers[qCode] !== undefined
+                     ? APP.surveyAnswers[qCode]
+                     : null;
   });
   return answers;
 }
 
-// ══════════════════════════════════════
-// ثم استبدل submitSurvey بهذا
-// ══════════════════════════════════════
 function submitSurvey() {
   var btn = document.getElementById('surveyBtn');
   btn.disabled = true;
@@ -258,20 +226,8 @@ function submitSurvey() {
       category:     APP.category,
       providerCode: APP.providerCode,
       providerName: APP.providerName,
-      answers:      collectSurveyAnswers()  // ✅ كل الأسئلة حتى الفاضية
+      answers:      collectSurveyAnswers()
     }
-  }, function(err, res) {
-    showLoading(false);
-    if (err || !res || !res.success) {
-      alert('خطأ في الإرسال — حاول مرة أخرى');
-      btn.disabled = false;
-      return;
-    }
-    showSuccess(res.id, 'survey');
-  });
-}
-
-
   }, function(err, res) {
     showLoading(false);
     if(err || !res || !res.success) {
@@ -283,9 +239,6 @@ function submitSurvey() {
   });
 }
 
-// ══════════════════════════════════════════════════════════════
-// الخطوة 4B — الشكوى
-// ══════════════════════════════════════════════════════════════
 function goComplaint() { goStep('4c'); }
 
 function toggleRecord() {
@@ -370,9 +323,6 @@ function previewImages() {
     APP.imageFiles.length + ' صورة مختارة';
 }
 
-// ══════════════════════════════════════════════════════════════
-// إرسال الشكوى — API فقط عند الإرسال
-// ══════════════════════════════════════════════════════════════
 function submitComplaint() {
   var text = document.getElementById('complaintText').value.trim();
   if(!text && !APP.audioBase64) {
@@ -414,24 +364,27 @@ function submitComplaint() {
   });
 }
 
-// ══════════════════════════════════════════════════════════════
-// callAPI — للإرسال فقط
-// ══════════════════════════════════════════════════════════════
 function callAPI(action, params, cb) {
   var body = JSON.stringify(Object.assign({action: action}, params || {}));
+  var controller = new AbortController();
+  var timeout = setTimeout(function() { controller.abort(); }, 30000);
   fetch(SCRIPT_URL, {
     method:  'POST',
     headers: {'Content-Type': 'text/plain'},
-    body:    body
+    body:    body,
+    signal:  controller.signal
   })
-  .then(function(r){ return r.json(); })
+  .then(function(r) {
+    clearTimeout(timeout);
+    return r.json();
+  })
   .then(function(data){ cb(null, data); })
-  .catch(function(err){ cb(err, null); });
+  .catch(function(err){
+    clearTimeout(timeout);
+    cb(err, null);
+  });
 }
 
-// ══════════════════════════════════════════════════════════════
-// شاشة النجاح
-// ══════════════════════════════════════════════════════════════
 function showSuccess(id, type) {
   document.getElementById('ticketId').textContent = id;
   if(type === 'complaint') {
@@ -446,17 +399,12 @@ function showSuccess(id, type) {
   goStep('ok');
 }
 
-// ══════════════════════════════════════════════════════════════
-// إعادة التشغيل
-// ══════════════════════════════════════════════════════════════
 function resetApp() {
   Object.assign(APP, {
     step:1, nationalId:'', name:'', phone:'',
     category:'', providerCode:'', providerName:'',
     surveyAnswers:{}, audioBase64:null, imageFiles:[]
   });
-
-  // ✅ أضف هذين السطرين — إعادة تفعيل الأزرار
   var sBtn = document.getElementById('surveyBtn');
   var cBtn = document.getElementById('complaintBtn');
   if(sBtn) sBtn.disabled = false;
@@ -476,16 +424,11 @@ function resetApp() {
   mic.textContent      = '🎙️ ابدأ التسجيل';
   mic.style.background = '';
   mic.classList.remove('recording');
-
-  // ✅ إعادة تعيين select المنفذ وإخفاء الأزرار
   var sel = document.getElementById('providerSelect');
   if(sel) sel.innerHTML = '<option value="">-- اختر المنفذ --</option>';
   document.getElementById('actionBtns').style.display = 'none';
-
-  // ✅ مسح إجابات الاستبيان من الشاشة
   var sq = document.getElementById('surveyQuestions');
   if(sq) sq.innerHTML = '';
-
   goStep(1);
 }
 
