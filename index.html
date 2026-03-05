@@ -9,22 +9,20 @@
 </head>
 <body>
 
-<!-- ══════════ HEADER ══════════ -->
 <header class="app-header">
-  <div class="hdr-band">
-    <div class="hdr-logo-wrap">
-      <img src="https://upload.wikimedia.org/wikipedia/ar/a/ab/%D8%A7%D9%84%D9%87%D9%8A%D8%A6%D8%A9_%D8%A7%D9%84%D8%B9%D8%A7%D9%85%D8%A9_%D9%84%D9%84%D8%AA%D8%A3%D9%85%D9%8A%D9%86_%D8%A7%D9%84%D8%B5%D8%AD%D9%8A_%D8%A7%D9%84%D8%B4%D8%A7%D9%85%D9%84_%28%D9%85%D8%B5%D8%B1%29.png" alt="شعار الهيئة" class="hdr-logo">
-    </div>
-    <div class="hdr-sep"></div>
-    <div class="hdr-info">
-      <h1 class="hdr-h1">الهيئة العامة للتأمين الصحي الشامل</h1>
+  <div class="header-inner">
+    <img src="https://upload.wikimedia.org/wikipedia/ar/a/ab/%D8%A7%D9%84%D9%87%D9%8A%D8%A6%D8%A9_%D8%A7%D9%84%D8%B9%D8%A7%D9%85%D8%A9_%D9%84%D9%84%D8%AA%D8%A3%D9%85%D9%8A%D9%86_%D8%A7%D9%84%D8%B5%D8%AD%D9%8A_%D8%A7%D9%84%D8%B4%D8%A7%D9%85%D9%84_%28%D9%85%D8%B5%D8%B1%29.png"
+         alt="شعار الهيئة" class="logo-img">
+    <div class="hdr-text">
+      <h1>الهيئة العامة للتأمين الصحي الشامل</h1>
       <p class="hdr-sub">نظام تقديم شكاوى واستبيانات المنتفعين</p>
       <p class="hdr-branch" id="branchName">فرع الأقصر</p>
     </div>
   </div>
-  <div class="hdr-progress">
-    
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progressBar" style="width:25%"></div>
   </div>
+  <p class="steps-label" id="stepLabel">الخطوة 1 من 4</p>
 </header>
 
 <div class="container">
@@ -86,7 +84,9 @@
   <!-- STEP 4A: استبيان -->
   <div class="card step" id="step4survey">
     <h2>📊 استبيان الخدمة</h2>
-    <div id="surveyQuestions"><div class="loading-inline"><div class="spinner sm"></div></div></div>
+    <div id="surveyQuestions">
+      <div class="loading-inline"><div class="spinner sm"></div></div>
+    </div>
     <button class="btn-primary" id="surveyBtn" onclick="submitSurvey()">إرسال الاستبيان ✓</button>
     <button class="btn-ghost" onclick="goStep(3)">← رجوع</button>
   </div>
@@ -98,8 +98,6 @@
       <label>وصف الشكوى <span class="req">*</span></label>
       <textarea id="complaintText" rows="4" placeholder="اكتب تفاصيل شكواك هنا..."></textarea>
     </div>
-
-    <!-- تسجيل صوتي مباشر (يعمل خارج Apps Script) -->
     <div class="audio-section">
       <label>🎙️ تسجيل صوتي (اختياري)</label>
       <div class="audio-controls">
@@ -115,8 +113,6 @@
       </label>
       <p class="hint">الحد الأقصى: 90 ثانية / 10MB</p>
     </div>
-
-    <!-- صور -->
     <div class="form-group">
       <label>📎 إرفاق صور (اختياري)</label>
       <label class="upload-area" for="imgInput">
@@ -126,7 +122,6 @@
       </label>
       <div id="previewContainer" class="preview-grid"></div>
     </div>
-
     <button class="btn-primary" id="complaintBtn" onclick="submitComplaint()">إرسال الشكوى ✓</button>
     <button class="btn-ghost" onclick="goStep(3)">← رجوع</button>
   </div>
@@ -151,14 +146,6 @@
   <div class="loading-box"><div class="spinner"></div><p>جارٍ الإرسال...</p></div>
 </div>
 
-<script src="config.js"></script>
-<script src="data.js"></script>
-<script src="scripts.js"></script>
-  
-
-</body>
-
-<!-- ══════════ FOOTER ══════════ -->
 <footer class="app-footer">
   <div class="footer-inner">
     <span class="footer-rule"></span>
