@@ -223,8 +223,10 @@ function selY(btn, code, val) {
 // ══════════════════════════════════════════════════════════════
 // إرسال الاستبيان — API فقط عند الإرسال
 // ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════
+// أضف دالة collectSurveyAnswers أولاً
+// ══════════════════════════════════════
 function collectSurveyAnswers() {
-  // كل الأسئلة الممكنة
   var ALL_QUESTIONS = [
     'Q_COM_01','Q_COM_02','Q_COM_03','Q_COM_03B',
     'Q_COM_04','Q_COM_05','Q_COM_99',
@@ -233,16 +235,42 @@ function collectSurveyAnswers() {
     'Q_CONT_01','Q_CONT_02','Q_CONT_03','Q_CONT_04',
     'Q_LAB_01','Q_LAB_02','Q_LAB_03','Q_LAB_04'
   ];
-
   var answers = {};
-
-  // ✅ كل الأسئلة تتبعت — الفاضية بـ null
   ALL_QUESTIONS.forEach(function(qCode) {
     answers[qCode] = APP.surveyAnswers[qCode] || null;
   });
-
   return answers;
 }
+
+// ══════════════════════════════════════
+// ثم استبدل submitSurvey بهذا
+// ══════════════════════════════════════
+function submitSurvey() {
+  var btn = document.getElementById('surveyBtn');
+  btn.disabled = true;
+  showLoading(true);
+
+  callAPI('saveSurvey', {
+    payload: {
+      nationalId:   APP.nationalId,
+      name:         APP.name,
+      phone:        APP.phone,
+      category:     APP.category,
+      providerCode: APP.providerCode,
+      providerName: APP.providerName,
+      answers:      collectSurveyAnswers()  // ✅ كل الأسئلة حتى الفاضية
+    }
+  }, function(err, res) {
+    showLoading(false);
+    if (err || !res || !res.success) {
+      alert('خطأ في الإرسال — حاول مرة أخرى');
+      btn.disabled = false;
+      return;
+    }
+    showSuccess(res.id, 'survey');
+  });
+}
+
 
   }, function(err, res) {
     showLoading(false);
