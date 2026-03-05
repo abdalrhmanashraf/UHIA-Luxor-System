@@ -36,11 +36,10 @@ function callAPI(action, params, cb) {
 // ── تهيئة ──────────────────────────────────────────────────
 window.addEventListener('load', function() {
   document.getElementById('branchName').textContent = BRANCH_NAME;
-  callAPI('getCategories', {}, function(err, cats) {
-    if(err) { console.error(err); return; }
-    renderCategories(cats);
-  });
+  // يأخذ من data.js مباشرة — بدون API
+  renderCategories(STATIC_DATA.categories);
 });
+
 
 // ── التنقل بين الخطوات ─────────────────────────────────────
 function goStep(n) {
@@ -103,17 +102,13 @@ function selectCat(cat, el) {
   });
   el.classList.add('selected');
   APP.category = cat;
-  var sel = document.getElementById('providerSelect');
-  sel.innerHTML = '<option value="">جارٍ التحميل...</option>';
   document.getElementById('actionBtns').style.display = 'none';
-  setTimeout(function() {
-    goStep(3);
-    callAPI('getProviders', {category: cat}, function(err, list) {
-      if(err) { console.error(err); return; }
-      renderProviders(list);
-    });
-  }, 200);
+
+  // يأخذ من data.js مباشرة — بدون API
+  renderProviders(STATIC_DATA.providers[cat] || []);
+  goStep(3);
 }
+
 
 function renderProviders(list) {
   var sel = document.getElementById('providerSelect');
@@ -141,13 +136,14 @@ function providerChanged() {
 // ── الاستبيان ──────────────────────────────────────────────
 function goSurvey() {
   goStep('4s');
-  document.getElementById('surveyQuestions').innerHTML =
-    '<div class="loading-inline"><div class="spinner sm"></div></div>';
-  callAPI('getQuestions', {category: APP.category}, function(err, questions) {
-    if(err) { console.error(err); return; }
-    renderSurvey(questions);
-  });
+
+  // يدمج الأسئلة المشتركة + أسئلة الفئة المختارة
+  var questions = (STATIC_DATA.questions['shared'] || [])
+    .concat(STATIC_DATA.questions[APP.category] || []);
+
+  renderSurvey(questions);
 }
+
 
 function renderSurvey(questions) {
   var c = document.getElementById('surveyQuestions');
