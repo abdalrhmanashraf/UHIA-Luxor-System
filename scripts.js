@@ -338,22 +338,54 @@ function previewImages() {
 // ══════════════════════════════════════════════════════════════
 // إرسال الشكوى — API فقط عند الإرسال
 // ══════════════════════════════════════════════════════════════
-function submitComplaint() {
+// ══════════════════════════════════════════════════════════════
+// إرسال الشكوى — مع ضغط الصور ✅
+// ══════════════════════════════════════════════════════════════
+async function submitComplaint() {
   var text = document.getElementById('complaintText').value.trim();
-  if(!text && !APP.audioBase64) {
+  if (!text && !APP.audioBase64) {
     alert('الرجاء كتابة الشكوى أو تسجيلها صوتياً');
     return;
   }
+
   var btn = document.getElementById('complaintBtn');
   btn.disabled = true;
   showLoading(true);
 
-  Promise.all(APP.imageFiles.map(function(f) {
-    return new Promise(function(res) {
-      var r = new FileReader();
-      r.onloadend = function() { res(r.result.split(',')[1]); };
-      r.readAsDataURL(f);
-    });
+  // ضغط الصور قبل الإرسال
+  var imgs = [];
+  if (APP.imageFiles.length > 0) {
+    document.querySelector('#loadingOverlay p').textContent = 'جارٍ ضغط الصور...';
+    for (var f of APP.imageFiles) {
+      var compressed = await compressImage(f);
+      imgs.push(compressed.split(',')[1]);
+    }
+    document.querySelector('#loadingOverlay p').textContent = 'جارٍ الإرسال...';
+  }
+
+  callAPI('saveComplaint', {
+    payload: {
+      nationalId:   APP.nationalId,
+      name:         APP.name,
+      phone:        APP.phone,
+      category:     APP.category,
+      providerCode: APP.providerCode,
+      providerName: APP.providerName,
+      text:         text,
+      audioBase64:  APP.audioBase64 || null,
+      images:       imgs
+    }
+  }, function(err, res) {
+    showLoading(false);
+    if (err || !res || !res.success) {
+      alert('خطأ في الإرسال — حاول مرة أخرى');
+      btn.disabled = false;
+      return;
+    }
+    showSuccess(res.id, 'complaint');
+  });
+}
+
   })).then(function(imgs) {
     callAPI('saveComplaint', {
       payload: {
@@ -440,3 +472,57 @@ function resetApp() {
 function showLoading(show) {
   document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
 }
+// ضغط الصور قبل الإرسال
+async function compressImage(file) {
+  return new Promise((resolve) => {
+    // لو مش صورة، ارجعها كما هي
+    if (!file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+
+    img.onload = () => {
+      const MAX_WIDTH = 900;
+      const MAX_HEIGHT = 900;
+      let w = img.width;
+      let h = img.height;
+
+      // تصغير الأبعاد لو كبيرة
+      if (w > MAX_WIDTH || h > MAX_HEIGHT) {
+        if (w > h) {
+          h = Math.round(h * MAX_WIDTH / w);
+          w = MAX_WIDTH;
+        } else {
+          w = Math.round(w * MAX_HEIGHT / h);
+          h = MAX_HEIGHT;
+        }
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+
+      URL.revokeObjectURL(url); // تحرير الذاكرة
+
+      // جودة 70% — توازن بين الحجم والوضوح
+      const compressed = canvas.toDataURL('image/jpeg', 0.7);
+      resolve(compressed);
+    };
+
+    img.onerror = () => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.readAsDataURL(file);
+    };
+
+    img.src = url;
+  });
+}
+
